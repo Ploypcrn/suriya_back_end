@@ -901,8 +901,8 @@ Task.createCustomerByInvoiceId = function createCustomerByInvoiceId(
         "admin",
         dateTime,
         "Y",
-        data.bill_type,
-        data.tax_id
+        data.billType,
+        data.taxId
       ],
       function (err, res) {
         if (err) {
@@ -1417,8 +1417,8 @@ Task.updateCustomerByInvoiceId = function updateCustomerByInvoiceId(
         data.send,
         "admin",
         data.update_date,
-        data.bill_type,
-        data.tax_id,
+        data.billType,
+        data.taxId,
         data.billId,
       ],
       function (err, res) {
