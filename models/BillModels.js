@@ -55,6 +55,8 @@ Task.getBill = function getBill(data, result) {
         tb_customer.mobile_no AS phone ,
         tb_customer.receive_from AS receiveFrom,
         tb_customer.send,
+        tb_customer.bill_type,
+        tb_customer.tax_id,
         tb_invoice.company_id,
         tb_company.company_name,
         bill_number AS billNo,
@@ -117,6 +119,8 @@ Task.getBillByBillNo = function getBillByBillNo(data, result) {
         tb_invoice.receive_date AS receiveDate,
         tb_invoice.receive_time AS receiveTime,
         tb_customer.send,
+        tb_customer.bill_type,
+        tb_customer.tax_id,
         company_id,
         company_name,
         tb_invoice.donate,
@@ -185,6 +189,8 @@ Task.getBillById = function getBillById(data, result) {
         tb_invoice.receive_date AS receiveDate,
         tb_invoice.receive_time AS receiveTime,
         tb_customer.send,
+        tb_customer.bill_type,
+        tb_customer.tax_id,
         company_id,
         company_name,
         tb_invoice.donate,
@@ -254,6 +260,8 @@ Task.searchBill = function searchBill(data, result) {
       "tb_invoice.receive_date AS receiveDate, " +
       "tb_invoice.receive_time AS receiveTime, " +
       "tb_customer.send, " +
+      "tb_customer.bill_type, " +
+      "tb_customer.tax_id, " +
       "company_id, " +
       "company_name, " +
       "tb_invoice.donate, " +
@@ -841,6 +849,7 @@ Task.createCustomerByInvoiceId = function createCustomerByInvoiceId(
 ) {
   let date = new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" });
   let dateTime = date.toString();
+
   return new Promise(function (resolve, reject) {
     var sql =
       "INSERT INTO tb_customer " +
@@ -856,7 +865,9 @@ Task.createCustomerByInvoiceId = function createCustomerByInvoiceId(
       "create_date, " +
       "update_by, " +
       "update_date, " +
-      "active_flag " +
+      "active_flag, " +
+      "bill_type, " +
+      "tax_id " +
       ") " +
       "VALUES( " +
       "$1, " +
@@ -870,7 +881,9 @@ Task.createCustomerByInvoiceId = function createCustomerByInvoiceId(
       "$9, " +
       "$10, " +
       "$11, " +
-      "$12 " +
+      "$12, " +
+      "$13, " +
+      "$14 " +
       ") " +
       "RETURNING id";
     client.query(
@@ -888,6 +901,8 @@ Task.createCustomerByInvoiceId = function createCustomerByInvoiceId(
         "admin",
         dateTime,
         "Y",
+        data.bill_type,
+        data.tax_id
       ],
       function (err, res) {
         if (err) {
@@ -1386,8 +1401,11 @@ Task.updateCustomerByInvoiceId = function updateCustomerByInvoiceId(
       "receive_from = $5, " +
       "send = $6, " +
       "update_by = $7, " +
-      "update_date = $8 " +
-      "WHERE invoice_id = $9";
+      "update_date = $8, " +
+      "bill_type = $9, " +
+      "tax_id = $10 " +
+      "WHERE invoice_id = $11";
+
     client.query(
       sql,
       [
@@ -1399,6 +1417,8 @@ Task.updateCustomerByInvoiceId = function updateCustomerByInvoiceId(
         data.send,
         "admin",
         data.update_date,
+        data.bill_type,
+        data.tax_id,
         data.billId,
       ],
       function (err, res) {
