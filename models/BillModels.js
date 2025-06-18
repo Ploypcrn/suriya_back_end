@@ -1073,7 +1073,7 @@ Task.updateBill = async function updateBill(data) {
 
 Task.fullPaymentBill = function fullPaymentBill(id) {
   return new Promise(function (resolve, reject) {
-    var sql = "UPDATE tb_invoice SET payExtra = net_balance, net_balance = 0, status_invoice  = 1 WHERE id = " + id;
+    var sql = "UPDATE tb_invoice SET pay_extra = net_balance, net_balance = 0, status_invoice  = 1 WHERE id = " + id;
 
     client.query(sql, function (err, res) {
       try {
