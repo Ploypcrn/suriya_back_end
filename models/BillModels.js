@@ -1070,6 +1070,31 @@ Task.updateBill = async function updateBill(data) {
   }
 };
 
+
+Task.fullPaymentBill = function fullPaymentBill(id) {
+  return new Promise(function (resolve, reject) {
+    var sql = "UPDATE tb_invoice SET net_balance = 0, status_invoice  = 1 WHERE id = " + id;
+    client.query(sql, function (err, res) {
+      try {
+        const require = {
+          data: res.rows,
+          error: err,
+          query_result: true,
+        };
+        resolve(require);
+      } catch (error) {
+        const require = {
+          data: [],
+          error: err,
+          query_result: false,
+        };
+        reject(require);
+      }
+    });
+    client.end;
+  });
+};
+
 // Helper function to format dates
 function formatDate(date) {
   if (!date) return null;
@@ -1080,6 +1105,23 @@ function formatDate(date) {
 
 Task.updateBillFreeText = async function updateBillFreeText(data) {
   try {
+
+ let prefix = "";
+
+if (data?.typeId === 1 || data?.typeId === 3) {
+  prefix = "BN";
+} else if (data?.typeId === 2) {
+  prefix = "WS";
+}
+
+const current_bill = data?.bill_number || "";
+
+if (current_bill.substring(0, 2) !== prefix) {
+  const newBillNumber = prefix + current_bill.slice(2);
+  data.bill_number = newBillNumber;
+}
+
+
     const sql = `
     UPDATE public.tb_invoice
     SET 
@@ -1101,8 +1143,9 @@ Task.updateBillFreeText = async function updateBillFreeText(data) {
         receive_time = $15, 
         issue_time = $16, 
         donate = $17, 
-        pay_extra = $18
-    WHERE id = $19;
+        pay_extra = $18,
+        bill_number = $19
+    WHERE id = $20;
 `;
 
     const values = [
@@ -1124,6 +1167,7 @@ Task.updateBillFreeText = async function updateBillFreeText(data) {
       data.issueTime,
       data.donate,
       data.payExtra,
+      data.bill_number,
       data.billId,
     ];
 
