@@ -1114,15 +1114,6 @@ if (data?.typeId === 1 || data?.typeId === 3) {
 } else if (data?.typeId === 2) {
   prefix = "WS";
 }
-
-const current_bill = data?.bill_number || "";
-
-if (current_bill.substring(0, 2) !== prefix) {
-  const suffix = current_bill.length > 2 ? current_bill.slice(2) : "";
-  data.bill_number = prefix + suffix;
-}
-
-
     const sql = `
     UPDATE public.tb_invoice
     SET 
@@ -1145,7 +1136,7 @@ if (current_bill.substring(0, 2) !== prefix) {
         issue_time = $16, 
         donate = $17, 
         pay_extra = $18,
-        bill_number = $19
+        bill_number = $19 || COALESCE(SUBSTRING(bill_number FROM 3), '')
     WHERE id = $20;
 `;
 
@@ -1168,7 +1159,7 @@ if (current_bill.substring(0, 2) !== prefix) {
       data.issueTime,
       data.donate,
       data.payExtra,
-      data.bill_number,
+      prefix,
       data.billId,
     ];
 
