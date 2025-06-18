@@ -184,6 +184,15 @@ Task.updateBillFreeText = async function updateBillFreeText(data, result) {
   }
 };
 
+Task.fullPaymentBill = async function fullPaymentBill(id, result) {
+  try {
+    var response = await BillModel.fullPaymentBill(id);
+    result(response);
+  } catch (error) {
+    result(error);
+  }
+};
+
 Task.deleteBill = async function deleteBill(id, result) {
   try {
     var response = await BillModel.deleteBill(id);
