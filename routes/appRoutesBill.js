@@ -1,169 +1,190 @@
-import axios from "axios";
+var BillController = require('../controllers/BillController');
+var bill_model = require('../models/BillModels');
 
-// bill/generateBillNo
-const generateBillNo = async () => {
-    try {
-        const response = await axios.get(`${import.meta.env.VITE_BASE_API_URL}/api/v1/bill/generateBillNo`);
-        return response.data;
-    } catch (error) {
-        console.error("An error occurred while generateBillNo :", error);
-        throw error;
-    }
-};
+// generateBillNo
 
-// bill/getBill
-const getBill = async () => {
-    try {
-        const response = await axios.get(`${import.meta.env.VITE_BASE_API_URL}/api/v1/bill/getBill`);
-        return response.data;
-    } catch (error) {
-        console.error("An error occurred while getBill :", error);
-        throw error;
-    }
-};
+module.exports = function (app) {
+    const key = '/api/v1';
+    app.get(`${key}/bill/generateBillNo`, function (req, res) {
+        BillController.generateBillNo(req.body, function (err, task) {
+            try {
+                if (err) {
+                    return res.send(err);
+                }
+                return res.send(task);
+            } catch (error) {
+                return res.send(error);
+            }
+        });
+    });
 
-// bill/getBillByBillNo
-const getBillByBillNo = async (billOn) => {
-    try {
-        const response = await axios.get(`${import.meta.env.VITE_BASE_API_URL}/api/v1/bill/getBillByBillNo/${billOn}`);
-        return response.data;
-    } catch (error) {
-        console.error("An error occurred while getBillByBillNo :", error);
-        throw error;
-    }
-};
+    // getBill
+    app.get(`${key}/bill/getBill`, function (req, res) {
+        BillController.getBill(req.body, function (err, task) {
+            try {
+                if (err) {
+                    return res.send(err);
+                }
+                return res.send(task);
+            } catch (error) {
+                return res.send(error);
+            }
+        });
+    });
 
-const getBillById = async (id) => {
-    try {
-        const response = await axios.get(`${import.meta.env.VITE_BASE_API_URL}/api/v1/bill/getBillById/${id}`);
-        return response.data;
-    } catch (error) {
-        console.error("An error occurred while getBillById :", error);
-        throw error;
-    }
-};
+    // getBillByBillNo/:bill_no
+    app.get(`${key}/bill/getBillByBillNo/:bill_no`, function (req, res) {
+        BillController.getBillByBillNo(req.params, function (err, task) {
+            try {
+                if (err) {
+                    return res.send(err);
+                }
+                return res.send(task);
+            } catch (error) {
+                return res.send(error);
+            }
+        });
+    });
 
-// bill/searchBill
-const searchBill = async (data) => {
-    try {
-        const response = await axios.post(`${import.meta.env.VITE_BASE_API_URL}/api/v1/bill/searchBill`, data);
-        return response.data;
-    } catch (error) {
-        console.error("An error occurred while searchBill :", error);
-        throw error;
-    }
+      // getBillById/:id
+      app.get(`${key}/bill/getBillById/:id`, function (req, res) {
+        BillController.getBillById(req.params, function (err, task) {
+            try {
+                if (err) {
+                    return res.send(err);
+                }
+                return res.send(task);
+            } catch (error) {
+                return res.send(error);
+            }
+        });
+    });
+
+    // searchBill
+    app.post(`${key}/bill/searchBill`, function (req, res) {
+        BillController.searchBill(req.body, function (err, task) {
+            try {
+                if (err) {
+                    return res.send(err);
+                }
+                return res.send(task);
+            } catch (error) {
+                return res.send(error);
+            }
+        });
+    });
+
+    // getBillByCustomer
+    app.get(`${key}/bill/getBillByCustomer`, function (req, res) {
+        BillController.getBillByCustomer(req.body, function (err, task) {
+            try {
+                if (err) {
+                    return res.send(err);
+                }
+                return res.send(task);
+            } catch (error) {
+                return res.send(error);
+            }
+        });
+    });
+
+    // getBillByDate
+    app.get(`${key}/bill/getBillByDate`, function (req, res) {
+        BillController.getBillByDate(req.body, function (err, task) {
+            try {
+                if (err) {
+                    return res.send(err);
+                }
+                return res.send(task);
+            } catch (error) {
+                return res.send(error);
+            }
+        });
+    });
+
+
+    // createBillFreeText
+    app.post(`${key}/bill/createBillFreeText`, function (req, res) {
+        BillController.createBillFreeText(req.body, function (err, task) {
+            try {
+                if (err) {
+                    return res.send(err);
+                }
+                return res.send(task);
+            } catch (error) {
+                return res.send(error);
+            }
+        });
+    });
+
+    // updateBillFreeText
+    app.put(`${key}/bill/updateBillFreeText/:id`, function (req, res) {
+        BillController.updateBillFreeText(req.body, function (err, task) {
+            try {
+                if (err) {
+                    return res.send(err);
+                }
+                return res.send(task);
+            } catch (error) {
+                return res.send(error);
+            }
+        });
+    });
+
+    app.put(`${key}/bill/fullPaymentBill/:id`, function (req, res) {
+        const id = req.params.id;
+        BillController.fullPaymentBill( id, function (err, task) {
+            try {
+                if (err) {
+                    return res.send(err);
+                }
+                return res.send(task);
+            } catch (error) {
+                return res.send(error);
+            }
+        });
+    });
+
+
+    // deleteBill
+    app.delete(`${key}/bill/deleteBill/:id`, function (req, res) {
+        const id = req.params.id;
+        BillController.deleteBill( id, function (err, task) {
+            try {
+                if (err) {
+                    return res.send(err);
+                }
+                return res.send(task);
+            } catch (error) {
+                return res.send(error);
+            }
+        });
+    });
+
+    app.delete(`${key}/bill/deleteListProductByInvoiceId/:bill_no`, function (req, res) {
+        BillController.deleteListProductByListProductId(req.params, function (err, task) {
+            try {
+                if (err) {
+                    return res.send(err);
+                }
+                return res.send(task);
+            } catch (error) {
+                return res.send(error);
+            }
+        });
+    });
+    // deleteProductById
+    app.delete(`${key}/bill/deleteProductById/:id`, function (req, res) {
+        BillController.deleteProductById(req.params, function (err, task) {
+            try {
+                if (err) {
+                    return res.send(err);
+                }
+                return res.send(task);
+            } catch (error) {
+                return res.send(error);
+            }
+        });
+    });
 }
 
-// bill/createBill
-const createBill = async (data) => {
-    try {
-        const response = await axios.post(`${import.meta.env.VITE_BASE_API_URL}/api/v1/bill/createBill`, data);
-        return response.data;
-    } catch (error) {
-        console.error("An error occurred while createBill :", error);
-        throw error;
-    }
-};
-
-// createBillFreeText
-const createBillFreeText = async (data) => {
-    try {
-        const response = await axios.post(`${import.meta.env.VITE_BASE_API_URL}/api/v1/bill/createBillFreeText`, data);
-        return response.data;
-    } catch (error) {
-        console.error("An error occurred while createBillFreeText :", error);
-        throw error;
-    }
-};
-
-const createListProduct = async (data) => {
-    try {
-        const response = await axios.post(`${import.meta.env.VITE_BASE_API_URL}/api/v1/bill/createListProduct`, data);
-        return response.data;
-    } catch (error) {
-        console.error("An error occurred while createListProduct :", error);
-        throw error;
-    }
-};
-
-// bill/updateBill
-const updateBill = async (id, data) => {
-    try {
-        const response = await axios.put(`${import.meta.env.VITE_BASE_API_URL}/api/v1/bill/updateBill/${id}`, data);
-        return response.data;
-    } catch (error) {
-        console.error("An error occurred while updateBill :", error);
-        throw error;
-    }
-};
-
-// bill/updateBillFreeText
-const updateBillFreeText = async (id, data) => {
-    try {
-        const response = await axios.put(`${import.meta.env.VITE_BASE_API_URL}/api/v1/bill/updateBillFreeText/${id}`, data);
-        return response.data;
-    } catch (error) {
-        console.error("An error occurred while updateBillFreeText :", error);
-        throw error;
-    }
-};
-
-// bill/deleteBill
-const deleteBill = async (id) => {
-    try {
-        const response = await axios.delete(`${import.meta.env.VITE_BASE_API_URL}/api/v1/bill/deleteBill/${id}`);
-        return response.data;
-    } catch (error) {
-        console.error("An error occurred while deleteBill :", error);
-        throw error;
-    }
-}
-
-const fullPaymentBill = async (id) => {
-    try {
-        const response = await axios.delete(`${import.meta.env.VITE_BASE_API_URL}/api/v1/bill/fullPaymentBill/${id}`);
-        return response.data;
-    } catch (error) {
-        console.error("An error occurred while fullPaymentBill :", error);
-        throw error;
-    }
-}
-
-
-
-const deleteListProductByInvoiceId = async (id) => {
-    try {
-        const response = await axios.delete(`${import.meta.env.VITE_BASE_API_URL}/api/v1/bill/deleteListProductByInvoiceId/${id}`);
-        return response.data;
-    } catch (error) {
-        console.error("An error occurred while deleteListProductByInvoiceId :", error);
-        throw error;
-    }
-};
-
-const deleteProductById = async (id) => {
-    try {
-        const response = await axios.delete(`${import.meta.env.VITE_BASE_API_URL}/api/v1/bill/deleteProductById/${id}`);
-        return response.data;
-    } catch (error) {
-        console.error("An error occurred while deleteProductById :", error);
-        throw error;
-    }
-};
-
-export default {
-    generateBillNo,
-    getBill,
-    getBillByBillNo,
-    searchBill,
-    createBill,
-    createBillFreeText,
-    createListProduct,
-    updateBill,
-    updateBillFreeText,
-    fullPaymentBill,
-    deleteBill,
-    deleteListProductByInvoiceId,
-    deleteProductById,
-    getBillById
-}
