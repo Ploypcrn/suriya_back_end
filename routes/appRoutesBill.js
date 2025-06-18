@@ -131,6 +131,21 @@ module.exports = function (app) {
         });
     });
 
+    app.put(`${key}/bill/fullPaymentBill/:id`, function (req, res) {
+        const id = req.params.id;
+        BillController.fullPaymentBill( id, function (err, task) {
+            try {
+                if (err) {
+                    return res.send(err);
+                }
+                return res.send(task);
+            } catch (error) {
+                return res.send(error);
+            }
+        });
+    });
+
+
     // deleteBill
     app.delete(`${key}/bill/deleteBill/:id`, function (req, res) {
         const id = req.params.id;
