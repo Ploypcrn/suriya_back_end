@@ -55,8 +55,8 @@ Task.getBill = function getBill(data, result) {
         tb_customer.mobile_no AS phone ,
         tb_customer.receive_from AS receiveFrom,
         tb_customer.send,
-        tb_customer.bill_type,
-        tb_customer.tax_id,
+        tb_customer.bill_type as billType,
+        tb_customer.tax_id as taxId,
         tb_invoice.company_id,
         tb_company.company_name,
         bill_number AS billNo,
@@ -119,8 +119,8 @@ Task.getBillByBillNo = function getBillByBillNo(data, result) {
         tb_invoice.receive_date AS receiveDate,
         tb_invoice.receive_time AS receiveTime,
         tb_customer.send,
-        tb_customer.bill_type,
-        tb_customer.tax_id,
+        tb_customer.bill_type as billType,
+        tb_customer.tax_id as taxId,
         company_id,
         company_name,
         tb_invoice.donate,
@@ -189,8 +189,8 @@ Task.getBillById = function getBillById(data, result) {
         tb_invoice.receive_date AS receiveDate,
         tb_invoice.receive_time AS receiveTime,
         tb_customer.send,
-        tb_customer.bill_type,
-        tb_customer.tax_id,
+        tb_customer.bill_type as billType,
+        tb_customer.tax_id as taxId,
         company_id,
         company_name,
         tb_invoice.donate,
@@ -260,8 +260,8 @@ Task.searchBill = function searchBill(data, result) {
       "tb_invoice.receive_date AS receiveDate, " +
       "tb_invoice.receive_time AS receiveTime, " +
       "tb_customer.send, " +
-      "tb_customer.bill_type, " +
-      "tb_customer.tax_id, " +
+      "tb_customer.bill_type as billType, " +
+      "tb_customer.tax_id as taxId, " +
       "company_id, " +
       "company_name, " +
       "tb_invoice.donate, " +
