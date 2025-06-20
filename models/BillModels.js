@@ -305,7 +305,7 @@ Task.searchBill = function searchBill(data, result) {
     }
     if (data?.dateRange) {
       sql +=
-        "AND tb_invoice.update_date BETWEEN $" +
+        "AND tb_invoice.create_date BETWEEN $" +
         paramIndex++ +
         " AND $" +
         paramIndex++ +
@@ -599,35 +599,41 @@ Task.createBill = function createBill(data, result) {
 Task.createBillFreeText = async function createBillFreeText(data) {
   try {
     // 1. ดึงหมายเลขบิลล่าสุด
-    const res = await client.query(
-      "SELECT bill_number FROM tb_invoice ORDER BY id DESC LIMIT 1"
-    );
+  const res = await client.query(
+    "SELECT bill_number FROM tb_invoice ORDER BY id DESC LIMIT 1"
+  );
 
-    // 2. สร้างหมายเลขบิลใหม่
-    let newBillNumber = "";
-    let prefix =
-      data?.typeId == 1 || data?.typeId == 3
-        ? "BN"
-        : data?.typeId == 2
-        ? "WS"
-        : "";
-    const lastBillNo = res?.rowCount > 0 ? res?.rows[0]?.bill_number : null;
+  // 2. สร้างหมายเลขบิลใหม่
+  let newBillNumber = "";
+  let prefix =
+    data?.typeId == 1 || data?.typeId == 3
+      ? "BN"
+      : data?.typeId == 2
+      ? "WS"
+      : "";
 
-    const currentYearTH = new Date().getFullYear() + 543;
-    const currentYear = currentYearTH.toString().substring(2, 4);
+  const lastBillNo = res?.rowCount > 0 ? res?.rows[0]?.bill_number : null;
 
-    if (lastBillNo) {
-      const lastYear = lastBillNo.substring(2, 4);
-      const lastNo = lastBillNo.substring(4, 10);
-      newBillNumber =
-        currentYear === lastYear
-          ? prefix +
-            currentYear +
-            (parseInt(lastNo) + 1).toString().padStart(6, "0")
-          : prefix + currentYear + "000001";
-    } else {
-      newBillNumber = prefix + currentYear + "000001";
-    }
+  const currentYearTH = new Date().getFullYear() + 543;
+  const currentYear = currentYearTH.toString().substring(2, 4);
+
+  // ตั้งค่า padding ตามปี
+  const padLength = currentYearTH > 2568 ? 5 : 6;
+
+  if (lastBillNo) {
+    const lastYear = lastBillNo.substring(2, 4);
+    const lastNo = lastBillNo.substring(4);
+
+    newBillNumber =
+      currentYear === lastYear
+        ? prefix +
+          currentYear +
+          (parseInt(lastNo) + 1).toString().padStart(padLength, "0")
+        : prefix + currentYear + "1".padStart(padLength, "0");
+  } else {
+    newBillNumber = prefix + currentYear + "1".padStart(padLength, "0");
+  }
+
 
     // 3. สร้างข้อมูล SQL สำหรับ INSERT
     const columns = [
@@ -693,7 +699,7 @@ Task.createBillFreeText = async function createBillFreeText(data) {
 
     // 4. รันคำสั่ง INSERT
     const insertRes = await client.query(sql, dataValues);
-    console.log(insertRes)
+    console.log(insertRes);
     const invoiceId = insertRes.rows[0].id;
 
     // 5. จัดการสินค้า (listProduct)
@@ -902,7 +908,7 @@ Task.createCustomerByInvoiceId = function createCustomerByInvoiceId(
         dateTime,
         "Y",
         data.billType,
-        data.taxId
+        data.taxId,
       ],
       function (err, res) {
         if (err) {
@@ -1085,10 +1091,11 @@ Task.updateBill = async function updateBill(data) {
   }
 };
 
-
 Task.fullPaymentBill = function fullPaymentBill(id) {
   return new Promise(function (resolve, reject) {
-    var sql = "UPDATE tb_invoice SET pay_extra = net_balance, net_balance = 0, status_invoice  = 1 WHERE id = " + id;
+    var sql =
+      "UPDATE tb_invoice SET pay_extra = net_balance, net_balance = 0, status_invoice  = 1 WHERE id = " +
+      id;
 
     client.query(sql, function (err, res) {
       try {
@@ -1121,14 +1128,13 @@ function formatDate(date) {
 
 Task.updateBillFreeText = async function updateBillFreeText(data) {
   try {
+    let prefix = "";
 
- let prefix = "";
-
-if (data?.typeId === 1 || data?.typeId === 3) {
-  prefix = "BN";
-} else if (data?.typeId === 2) {
-  prefix = "WS";
-}
+    if (data?.typeId === 1 || data?.typeId === 3) {
+      prefix = "BN";
+    } else if (data?.typeId === 2) {
+      prefix = "WS";
+    }
     const sql = `
     UPDATE public.tb_invoice
     SET 
