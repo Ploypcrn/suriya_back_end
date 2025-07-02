@@ -41,6 +41,7 @@ var appRoutesCompany = require("./routes/appRoutesCompany");
 var appRouteCheque = require("./routes/appRoutesCheque");
 var appRouteExpense = require("./routes/appRoutesExpense");
 var appRouteIncomeExpenses = require("./routes/appRoutesIncomeExpenses");
+var appRouteDashboard = require("./routes/appRoutesDashboard");
 // set routes
 
 appRouteAuthen(app);
@@ -52,3 +53,4 @@ appRoutesCompany(app);
 appRouteCheque(app);
 appRouteExpense(app);
 appRouteIncomeExpenses(app);
+appRouteDashboard(app);
