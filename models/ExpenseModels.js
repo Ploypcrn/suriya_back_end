@@ -16,10 +16,16 @@ Task.getExpense = function getExpense(data, result) {
 	te.create_date,
 	te.update_by,
 	te.update_date,
-	te.active_flag
+	te.active_flag,
+  te.group_type_id,
+  te.ref_bill_number,
+  te.payment_type_id,
+  tmpt.payment_type_name,
+  te.ref_cheque_number
 from
 	tb_expense te
 left join tb_mas_expense_type tmet on tmet.id = te.expense_type_id and tmet.active_flag = 'Y'
+left join tb_mas_payment_type tmpt on tmpt.id = te.payment_type_id and tmpt.active_flag = 'Y'
 where te.active_flag = 'Y'
 order by te.update_date desc`;
 
@@ -51,10 +57,16 @@ Task.getExpenseById = function getExpenseById(data, result) {
     te.amount,
     te.remark,
     te.expense_type_id,
-    tmet.expense_type_name
+    tmet.expense_type_name,
+    te.group_type_id,
+    te.ref_bill_number,
+    te.payment_type_id,
+    tmpt.payment_type_name,
+    te.ref_cheque_number
   from
     tb_expense te
   left join tb_mas_expense_type tmet on tmet.id = te.expense_type_id and tmet.active_flag = 'Y'
+  left join tb_mas_payment_type tmpt on tmpt.id = te.payment_type_id and tmpt.active_flag = 'Y'
   where te.active_flag = 'Y' and te.id = $1`;
 
     client.query(sql, [data.id], function (err, res) {
@@ -91,10 +103,16 @@ Task.searchExpense = function searchExpense(data, result) {
     te.create_date,
     te.update_by,
     te.update_date,
-    te.active_flag
+    te.active_flag,
+    te.group_type_id,
+    te.ref_bill_number,
+    te.payment_type_id,
+    tmpt.payment_type_name,
+    te.ref_cheque_number
   from
     tb_expense te
   left join tb_mas_expense_type tmet on tmet.id = te.expense_type_id and tmet.active_flag = 'Y'
+  left join tb_mas_payment_type tmpt on tmpt.id = te.payment_type_id and tmpt.active_flag = 'Y'
   where te.active_flag = 'Y' `;
 
     let params = [];
@@ -114,6 +132,11 @@ Task.searchExpense = function searchExpense(data, result) {
 
     if (data?.type) {
       sql += `and te.expense_type_id = $${paramIndex++} `;
+      params.push(data.type);
+    }
+
+  if (data?.receiptNumber) {
+      sql += `and te.ref_bill_number like '$${paramIndex++}' `;
       params.push(data.type);
     }
 
@@ -149,6 +172,10 @@ Task.createExpense = function createExpense(data, result) {
     amount,
     remark,
     expense_type_id,
+    group_type_id,
+    ref_bill_number,
+    payment_type_id,
+    ref_cheque_number,
     create_by,
     update_by
   )
@@ -158,7 +185,11 @@ Task.createExpense = function createExpense(data, result) {
   $3,
   $4,
   $5,
-  $6
+  $6,
+  $7,
+  $8,
+  $9,
+  $10
   )`;
 
     client.query(
@@ -168,6 +199,10 @@ Task.createExpense = function createExpense(data, result) {
         data.amount,
         data.expenseRemark,
         data.expenseType,
+        data.group_type_id,
+        data.ref_bill_number,
+        data.payment_type_id,
+        data.ref_cheque_number,
         "admin",
         "admin",
       ],
@@ -202,10 +237,14 @@ Task.updateExpense = function updateExpense(data) {
     expense_name = $2,
     amount = $3,
     remark = $4,
+    group_type_id = $5,
+    ref_bill_number = $6,
+    payment_type_id = $7,
+    ref_cheque_number = $8,
     update_by = 'admin',
     update_date = CURRENT_TIMESTAMP
   where
-    id = $5`;
+    id = $9`;
 
     client.query(
       sql,
@@ -214,6 +253,10 @@ Task.updateExpense = function updateExpense(data) {
         data.expenseName,
         data.amount,
         data.expenseRemark,
+        data.group_type_id,
+        data.ref_bill_number,
+        data.payment_type_id,
+        data.ref_cheque_number,
         data.id,
       ],
       function (err, res) {
