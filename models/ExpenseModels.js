@@ -136,7 +136,7 @@ Task.searchExpense = function searchExpense(data, result) {
     }
 
   if (data?.receiptNumber) {
-      sql += `and te.ref_bill_number like '$${paramIndex++}' `;
+      sql += `and te.ref_bill_number like '%$${paramIndex++}%' `;
       params.push(data.type);
     }
 
