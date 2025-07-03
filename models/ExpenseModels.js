@@ -27,7 +27,7 @@ from
 left join tb_mas_expense_type tmet on tmet.id = te.expense_type_id and tmet.active_flag = 'Y'
 left join tb_mas_payment_type tmpt on tmpt.id = te.payment_type_id and tmpt.active_flag = 'Y'
 where te.active_flag = 'Y'
-order by te.update_date desc`;
+order by te.create_date desc`;
 
     client.query(sql, function (err, res) {
       if (err) {
@@ -122,10 +122,10 @@ Task.searchExpense = function searchExpense(data, result) {
 
       // check same date
       if (data.dateRange[0] === data.dateRange[1]) {
-        sql += `and te.update_date between $${paramIndex++} and $${paramIndex++} `;
+        sql += `and te.create_date between $${paramIndex++} and $${paramIndex++} `;
         params.push(data.dateRange[0].split("T")[0], data.dateRange[1]);
       } else {
-        sql += `and te.update_date between $${paramIndex++} and $${paramIndex++} `;
+        sql += `and te.create_date between $${paramIndex++} and $${paramIndex++} `;
         params.push(data.dateRange[0], data.dateRange[1]);
       }
     }
@@ -140,7 +140,7 @@ Task.searchExpense = function searchExpense(data, result) {
       params.push(data.type);
     }
 
-    sql += `order by te.update_date desc`;
+    sql += `order by te.create_date desc`;
     client.query(sql, params, function (err, res) {
       if (err) {
         const require = {
