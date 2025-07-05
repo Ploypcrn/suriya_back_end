@@ -12,6 +12,7 @@ Task.getExpense = function getExpense(data, result) {
 	te.remark,
 	te.expense_type_id,
 	tmet.expense_type_name,
+  te.expense_date,
 	te.create_by,
 	te.create_date,
 	te.update_by,
@@ -27,7 +28,7 @@ from
 left join tb_mas_expense_type tmet on tmet.id = te.expense_type_id and tmet.active_flag = 'Y'
 left join tb_mas_payment_type tmpt on tmpt.id = te.payment_type_id and tmpt.active_flag = 'Y'
 where te.active_flag = 'Y'
-order by te.create_date desc`;
+order by te.expense_date desc`;
 
     client.query(sql, function (err, res) {
       if (err) {
@@ -62,7 +63,8 @@ Task.getExpenseById = function getExpenseById(data, result) {
     te.ref_bill_number,
     te.payment_type_id,
     tmpt.payment_type_name,
-    te.ref_cheque_number
+    te.ref_cheque_number,
+    te.expense_date
   from
     tb_expense te
   left join tb_mas_expense_type tmet on tmet.id = te.expense_type_id and tmet.active_flag = 'Y'
@@ -101,6 +103,7 @@ Task.searchExpense = function searchExpense(data, result) {
     tmet.expense_type_name,
     te.create_by,
     te.create_date,
+    te.expense_date,
     te.update_by,
     te.update_date,
     te.active_flag,
@@ -122,10 +125,10 @@ Task.searchExpense = function searchExpense(data, result) {
 
       // check same date
       if (data.dateRange[0] === data.dateRange[1]) {
-        sql += `and te.create_date between $${paramIndex++} and $${paramIndex++} `;
+        sql += `and te.expense_date between $${paramIndex++} and $${paramIndex++} `;
         params.push(data.dateRange[0].split("T")[0], data.dateRange[1]);
       } else {
-        sql += `and te.create_date between $${paramIndex++} and $${paramIndex++} `;
+        sql += `and te.expense_date between $${paramIndex++} and $${paramIndex++} `;
         params.push(data.dateRange[0], data.dateRange[1]);
       }
     }
@@ -141,7 +144,7 @@ Task.searchExpense = function searchExpense(data, result) {
     }
 
 
-    sql += `order by te.create_date desc`;
+    sql += `order by te.expense_date desc`;
     client.query(sql, params, function (err, res) {
       if (err) {
         const require = {
@@ -177,6 +180,7 @@ Task.createExpense = function createExpense(data, result) {
     ref_bill_number,
     payment_type_id,
     ref_cheque_number,
+    expense_date,
     create_by,
     update_by
   )
@@ -190,7 +194,8 @@ Task.createExpense = function createExpense(data, result) {
   $7,
   $8,
   $9,
-  $10
+  $10,
+  $11
   )`;
 
     client.query(
@@ -204,6 +209,7 @@ Task.createExpense = function createExpense(data, result) {
         data.ref_bill_number,
         data.payment_type_id,
         data.ref_cheque_number,
+        data.expense_date,
         "admin",
         "admin",
       ],
@@ -242,10 +248,11 @@ Task.updateExpense = function updateExpense(data) {
     ref_bill_number = $6,
     payment_type_id = $7,
     ref_cheque_number = $8,
+    expense_date = $9,
     update_by = 'admin',
     update_date = CURRENT_TIMESTAMP
   where
-    id = $9`;
+    id = $10`;
 
     client.query(
       sql,
@@ -258,6 +265,7 @@ Task.updateExpense = function updateExpense(data) {
         data.ref_bill_number,
         data.payment_type_id,
         data.ref_cheque_number,
+        data.expense_date,
         data.id,
       ],
       function (err, res) {
