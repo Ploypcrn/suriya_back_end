@@ -21,7 +21,7 @@ Task.getExpense = function getExpense(data, result) {
   te.group_type_id,
   te.ref_bill_number,
   te.payment_type_id,
-  tmpt.payment_type_name,
+  tmpt.payment_name as payment_type_name,
   te.ref_cheque_number
 from
 	tb_expense te
@@ -62,7 +62,7 @@ Task.getExpenseById = function getExpenseById(data, result) {
     te.group_type_id,
     te.ref_bill_number,
     te.payment_type_id,
-    tmpt.payment_type_name,
+    tmpt.payment_name as payment_type_name,
     te.ref_cheque_number,
     te.expense_date
   from
@@ -110,7 +110,7 @@ Task.searchExpense = function searchExpense(data, result) {
     te.group_type_id,
     te.ref_bill_number,
     te.payment_type_id,
-    tmpt.payment_type_name,
+    tmpt.payment_name as payment_type_name,
     te.ref_cheque_number
   from
     tb_expense te
