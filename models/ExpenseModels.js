@@ -26,7 +26,7 @@ Task.getExpense = function getExpense(data, result) {
 from
 	tb_expense te
 left join tb_mas_expense_type tmet on tmet.id = te.expense_type_id and tmet.active_flag = 'Y'
-left join tb_mas_payment_type tmpt on tmpt.id = te.payment_type_id and tmpt.active_flag = 'Y'
+left join tb_mas_payment tmpt on tmpt.id = te.payment_type_id and tmpt.active_flag = 'Y'
 where te.active_flag = 'Y'
 order by te.expense_date desc`;
 
@@ -68,7 +68,7 @@ Task.getExpenseById = function getExpenseById(data, result) {
   from
     tb_expense te
   left join tb_mas_expense_type tmet on tmet.id = te.expense_type_id and tmet.active_flag = 'Y'
-  left join tb_mas_payment_type tmpt on tmpt.id = te.payment_type_id and tmpt.active_flag = 'Y'
+  left join tb_mas_payment tmpt on tmpt.id = te.payment_type_id and tmpt.active_flag = 'Y'
   where te.active_flag = 'Y' and te.id = $1`;
 
     client.query(sql, [data.id], function (err, res) {
@@ -115,7 +115,7 @@ Task.searchExpense = function searchExpense(data, result) {
   from
     tb_expense te
   left join tb_mas_expense_type tmet on tmet.id = te.expense_type_id and tmet.active_flag = 'Y'
-  left join tb_mas_payment_type tmpt on tmpt.id = te.payment_type_id and tmpt.active_flag = 'Y'
+  left join tb_mas_payment tmpt on tmpt.id = te.payment_type_id and tmpt.active_flag = 'Y'
   where te.active_flag = 'Y' `;
 
     let params = [];
