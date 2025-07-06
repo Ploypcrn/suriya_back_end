@@ -48,7 +48,7 @@ Task.getExpenseSummary = async function getExpenseSummary(data) {
 Task.getExpenseComparison = async function getExpenseComparison(data) {
     return new Promise(function (resolve, reject) {
         var sql = `select date_trunc('${checkFilterType(data)}', tbi.create_date) as create_date,
-                    sum(tbi.price_after_discount) as price_after_discount, 
+                    sum(tbi.price_after_discount - tbi.net_balance) as price_after_discount, 
                     coalesce(sum(expense.amount), 0) as total_expense
                     from tb_invoice tbi
                     left join (
@@ -78,7 +78,9 @@ Task.getOperatingResult = async function getOperatingResult(data) {
         var sql = `with results as (
                         select date_trunc('${checkFilterType(data)}', tbi.create_date) as create_date , sum(tbi.total) as total, sum(tbi.net_balance) as remain, sum(tbi.total - tbi.price_after_discount) as dicount,
                         sum(tbi.deposit) as deposit, sum(tbi.price_after_discount) as price_after_discount, 
-                        coalesce(sum(expense.amount), 0) as total_expense
+                        coalesce(sum(expense.amount), 0) as total_expense,
+                        count(tbi.id) as total_bill,
+                        sum(case when tbi.net_balance > 0 then 1 else 0 end) as total_remain_bill
                         from tb_invoice tbi
                         left join (
                         select date_trunc('${checkFilterType(data)}', te.expense_date) as create_date, sum(te.amount) as amount from tb_expense te 
