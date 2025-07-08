@@ -47,19 +47,35 @@ Task.getExpenseSummary = async function getExpenseSummary(data) {
 
 Task.getExpenseComparison = async function getExpenseComparison(data) {
     return new Promise(function (resolve, reject) {
-        var sql = `select date_trunc('${checkFilterType(data)}', tbi.create_date) as create_date,
-                    sum(tbi.price_after_discount - tbi.net_balance) as price_after_discount, 
-                    coalesce(sum(expense.amount), 0) as total_expense
+        var sql = `with all_dates as (
+                    select date_trunc('${checkFilterType(data)}', tbi.create_date) as create_date,
+                        sum(tbi.price_after_discount - tbi.net_balance) as price_after_discount, 
+                        0 as total_expense
                     from tb_invoice tbi
-                    left join (
-                    select date_trunc('${checkFilterType(data)}', te.expense_date) as create_date, sum(te.amount) as amount from tb_expense te 
+                    where tbi.status_invoice <> '3'
+                    and tbi.create_date::date between $1 AND $2
+                    group by date_trunc('${checkFilterType(data)}', tbi.create_date)
+
+                    union
+
+                    select date_trunc('${checkFilterType(data)}', te.expense_date) as create_date,
+                        0 as price_after_discount, 
+                        sum(te.amount) as total_expense
+                    from tb_expense te
                     where te.active_flag = 'Y'
                     and te.expense_date::date between $1 AND $2
                     group by date_trunc('${checkFilterType(data)}', te.expense_date)
-                    ) as expense on date_trunc('${checkFilterType(data)}', tbi.create_date) = expense.create_date
-                    where tbi.status_invoice <> '3'
-                    and tbi.create_date::date between $1 AND $2
-                    group by date_trunc('${checkFilterType(data)}', tbi.create_date);`;
+                ),
+                results as (
+                    select create_date,
+                        sum(price_after_discount) as price_after_discount,
+                        sum(total_expense) as total_expense
+                    from all_dates
+                    group by create_date
+                )
+                select *
+                from results
+                order by create_date;`;
 
         client.query(sql, [data.dtStart, data.dtEnd], function (err, result) {
             if (err) {
@@ -75,28 +91,60 @@ Task.getExpenseComparison = async function getExpenseComparison(data) {
 
 Task.getOperatingResult = async function getOperatingResult(data) {
     return new Promise(function (resolve, reject) {
-        var sql = `with results as (
-                        select date_trunc('${checkFilterType(data)}', tbi.create_date) as create_date , sum(tbi.total) as total, sum(tbi.net_balance) as remain, sum(tbi.total - tbi.price_after_discount) as dicount,
-                        sum(tbi.deposit) as deposit, sum(tbi.price_after_discount) as price_after_discount, 
-                        coalesce(sum(expense.amount), 0) as total_expense,
+        var sql = `with all_dates as (
+                    select date_trunc('${checkFilterType(data)}', tbi.create_date) as create_date,
+                        sum(tbi.total) as total, 
+                        sum(tbi.net_balance) as remain, 
+                        sum(tbi.total - tbi.price_after_discount) as discount,
+                        sum(tbi.deposit) as deposit, 
+                        sum(tbi.price_after_discount) as price_after_discount, 
                         count(tbi.id) as total_bill,
-                        sum(case when tbi.net_balance > 0 then 1 else 0 end) as total_remain_bill
-                        from tb_invoice tbi
-                        left join (
-                        select date_trunc('${checkFilterType(data)}', te.expense_date) as create_date, sum(te.amount) as amount from tb_expense te 
-                        where te.active_flag = 'Y'
-                        and te.expense_date::date between $1 AND $2
-                        group by date_trunc('${checkFilterType(data)}', te.expense_date)
-                        ) as expense on date_trunc('${checkFilterType(data)}', tbi.create_date) = expense.create_date
-                        where tbi.status_invoice <> '3'
-                        and tbi.create_date::date between $1 AND $2
-                        group by date_trunc('${checkFilterType(data)}', tbi.create_date)
-                    )
-                    select r.*, (r.price_after_discount - r.total_expense) as profit,
-                    round(((r.price_after_discount - r.total_expense) / r.price_after_discount * 100), 2) as efficiency,
-                    round(((r.price_after_discount - r.remain) / r.price_after_discount * 100), 2) as collectionRate
-                    from results r
-                    order by r.create_date;`;
+                        sum(case when tbi.net_balance > 0 then 1 else 0 end) as total_remain_bill,
+                        0 as total_expense
+                    from tb_invoice tbi
+                    where tbi.status_invoice <> '3'
+                    and tbi.create_date::date between $1 AND $2
+                    group by date_trunc('${checkFilterType(data)}', tbi.create_date)
+
+                    union
+
+                    select date_trunc('${checkFilterType(data)}', te.expense_date) as create_date,
+                        0 as total, 
+                        0 as remain, 
+                        0 as discount,
+                        0 as deposit, 
+                        0 as price_after_discount, 
+                        0 as total_bill,
+                        0 as total_remain_bill,
+                        sum(te.amount) as total_expense
+                    from tb_expense te
+                    where te.active_flag = 'Y'
+                    and te.expense_date::date between $1 AND $2
+                    group by date_trunc('${checkFilterType(data)}', te.expense_date)
+                ),
+                results as (
+                    select d.create_date, 
+                        sum(coalesce(d.total, 0)) as total, 
+                        sum(coalesce(d.remain, 0)) as remain, 
+                        sum(coalesce(d.discount, 0)) as discount,
+                        sum(coalesce(d.deposit, 0)) as deposit, 
+                        sum(coalesce(d.price_after_discount, 0)) as price_after_discount,
+                        sum(coalesce(d.total_expense, 0)) as total_expense,
+                        sum(coalesce(d.total_bill, 0)) as total_bill,
+                        sum(coalesce(d.total_remain_bill, 0)) as total_remain_bill
+                    from all_dates d
+                    group by d.create_date
+                )
+                select r.*, 
+                    (r.price_after_discount - r.total_expense) as profit,
+                    case when r.price_after_discount > 0 
+                            then round(((r.price_after_discount - r.total_expense) / r.price_after_discount * 100), 2) 
+                            else 0 end as efficiency,
+                    case when r.price_after_discount > 0 
+                            then round(((r.price_after_discount - r.remain) / r.price_after_discount * 100), 2) 
+                            else 0 end as collectionRate
+                from results r
+                order by r.create_date;`;
 
         client.query(sql, [data.dtStart, data.dtEnd], function (err, result) {
             if (err) {
